@@ -1,20 +1,32 @@
 # KnowledgeFlow
+### Enterprise Knowledge Graph Architecture · v2.1
 
-**Agentic knowledge architecture for the regulated enterprise.**  
-TOGAF ADM · GCP · EU AI Act · GDPR · Human-in-the-loop by design.
+**Siddharth Rao** · TOGAF Enterprise Architect · Google Cloud Certified Architect · ML Engineer · Gen AI Leader
 
-> A portfolio architecture by [Siddharth Rao](https://raosiddharth.com) — Enterprise AI Architect · GCP · TOGAF 10  
-> [Portfolio](https://raosiddharth.com) · [LinkedIn](https://www.linkedin.com/in/siddharthpotukuchi) · [GitHub](https://github.com/raosiddharthp)
+---
+
+> *The organisational knowledge graph is the most valuable and least governed data asset in the enterprise. It has no schema, no owner, no SLA, and no recovery plan. KnowledgeFlow fixes that — structurally, not culturally.*
 
 ---
 
 ## What this is
 
-KnowledgeFlow is a reference enterprise architecture — not a product, not a prototype.
+KnowledgeFlow is a four-layer agentic AI architecture that instruments, governs, and accelerates enterprise knowledge flow at regulated-industry scale. It constructs a **governed, queryable, access-controlled knowledge graph** from the unstructured and semi-structured knowledge assets of a large professional services firm, then uses **LangGraph-orchestrated agents** on Google Cloud Platform to retrieve, synthesise, and deliver that knowledge — with every consequential decision interceptable, auditable, and explainable by design.
 
-It demonstrates how a senior architect thinks through an agentic AI system end-to-end: from business motivation through infrastructure deployment, across governance, compliance, economics, and Day 2 operations. Every decision is documented. Every trade-off is argued. Every diagram traces to a TOGAF ADM phase.
+This repository contains the **full architecture portfolio** — an interactive HTML document covering the problem framing, system design, ontology specification, agent architecture, governance model, economic analysis, implementation roadmap, and day-2 operations model.
 
-The anchor scenario is Meridian Consulting Group — 12,000 consultants, 40 offices, 6 continents — using agentic AI to instrument, govern, and accelerate organisational knowledge flow at regulated-industry scale.
+---
+
+## The problem it solves
+
+| Signal | Source |
+|--------|--------|
+| Knowledge workers spend **20% of their week** searching for information | McKinsey MGI, 2012 |
+| Large firms lose **~$47M/year** from unrealised knowledge-driven innovation | Deloitte Insights / HBR, 2019 |
+| **35% productivity reduction** attributable to poorly governed knowledge | Forrester, 2022 |
+| **30% of senior engineers** in manufacturing projected to retire within 5 years | SME, 2023 |
+
+The root cause is architectural: knowledge graphs are implicit, unstructured, and non-transferable. Every tool deployed against this problem (SharePoint, Confluence, Notion, Guru) treats the symptom — information retrieval — without the structural cause: absence of a governed, schema-defined, access-controlled knowledge architecture.
 
 ---
 
@@ -22,292 +34,230 @@ The anchor scenario is Meridian Consulting Group — 12,000 consultants, 40 offi
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│  L1  Experience       React/Next.js · Apigee X · IAP    │
+│  LAYER 1 · EXPERIENCE                                   │
+│  Next.js SPA · Apigee X · Identity-Aware Proxy · CDN   │
 ├─────────────────────────────────────────────────────────┤
-│  L2  Orchestration    LangGraph · Vertex AI Agent Builder│
-│                       Gemini 1.5 Pro · Pub/Sub           │
+│  LAYER 2 · AGENT ORCHESTRATION                         │
+│  LangGraph 0.2.x · Vertex AI Agent Builder             │
+│  Auth → Policy → Retrieval → [HITL] → Synthesis → Audit│
 ├─────────────────────────────────────────────────────────┤
-│  L3  Intelligence     Neo4j Aura · Vertex AI Search      │
-│                       Vertex AI Pipelines · BigQuery     │
+│  LAYER 3 · INTELLIGENCE                                 │
+│  Neo4j Aura Enterprise · Vertex AI Search               │
+│  text-embedding-004 · Vertex AI Pipelines · BigQuery    │
 ├─────────────────────────────────────────────────────────┤
-│  L4  Infrastructure   GKE Autopilot · Terraform          │
-│                       Chronicle SIEM · VPC SC · OPA      │
+│  LAYER 4 · INFRASTRUCTURE                              │
+│  GKE Autopilot · VPC Service Controls · Cloud KMS       │
+│  Chronicle SIEM · OPA v0.60 · Terraform 1.7.x           │
 └─────────────────────────────────────────────────────────┘
-          ↕ cross-cutting: GDPR · EU AI Act · HITL · Audit
 ```
 
-Four strict layers. Each independently deployable, independently governable, independently scalable. Cross-cutting concerns — security, compliance, HITL, audit — span all layers by design, not by integration.
+**Multi-tenancy model:** One GCP project per enterprise client. No shared Neo4j instance. Cryptographic tenant isolation via dedicated Cloud KMS key ring per client. Cross-tenant access is structurally impossible by project boundary design.
 
 ---
 
-## What the portfolio covers
+## Key design decisions (ADRs)
 
-### Architecture (13 diagrams)
+| ADR | Decision | Rejected alternatives |
+|-----|----------|-----------------------|
+| 001 | **LangGraph** for agent orchestration | Temporal.io, custom FSM, CrewAI |
+| 002 | **Neo4j Aura Enterprise 5.x** for graph store | Amazon Neptune, Spanner Graph |
+| 003 | **text-embedding-004** (multilingual) as canonical embedding model | OpenAI text-embedding-3-large, E5-large-v2 |
+| 004 | **OPA v0.60** with Rego policy bundles for access control | Casbin, custom IAM service, Cedar |
+| 005 | **Chronicle SIEM** as forensic audit layer + BigQuery as analytical layer | BigQuery-only, Splunk, Elastic |
+| 006 | **HITL as a LangGraph interrupt node**, not a UI feature | Post-synthesis feedback button, async-only queue |
 
-| Diagram | Notation | TOGAF Phase | Description |
-|---------|----------|-------------|-------------|
-| D1 | ArchiMate 3.2 Motivation | Phase A | Business Motivation Model — drivers, assessment, goals, principles |
-| D2 | ArchiMate Capability Map | Phase B | What the system does, technology-agnostic |
-| D3 | Value Stream | Phase B | Current state failure points vs target state |
-| D4 | ArchiMate Overview | Phase C | 30,000ft four-layer view |
-| D5 | C4 Container | Phase C | Experience layer container diagram |
-| D6 | C4 Component | Phase C | LangGraph agent topology with HITL conditional edge |
-| D7 | C4 Component | Phase C | ML/MLOps pipelines — ingestion, embedding, RLHF |
-| D8 | C4 Deployment | Phase C | Multi-region GCP deployment (3 regions) |
-| D9 | Access Control | Phase C | RBAC + ABAC + OPA composable policy architecture |
-| D10 | Data Flow | Phase C | GDPR lineage + Art. 17 erasure cascade |
-| D11 | Decision Gates | Phase C | HITL intercept types and routing |
-| D12 | Maturity Model | Phase E–H | Crawl/Walk/Run with ADM phase gates |
-| D13 | Operational Runbook | Phase H | Day 2: erasure cascade, RLHF loop, cost circuit breaker |
+Every ADR includes context, the decision, the alternatives rejected, and the architectural consequences. See the **Architecture** tab.
 
-### Decision records (6 ADRs)
+---
 
-| ID | Decision | Status |
-|----|----------|--------|
-| ADR-001 | Neo4j Aura Enterprise over relational/document model | Accepted |
-| ADR-002 | Composable RBAC + ABAC + OPA over single-model access control | Accepted |
-| ADR-003 | LangGraph for agent orchestration over prompt chaining | Accepted |
-| ADR-004 | GCP-native managed services over self-hosted OSS | Accepted |
-| ADR-005 | Chronicle SIEM as compliance audit backbone | Accepted |
-| ADR-006 | HITL as first-class architectural construct, not a UI feature | Accepted |
+## What makes this architecture different
 
-Each ADR documents: context · decision · consequences · strongest rebuttal with structured response.
+### 1. Compliance by structure, not policy document
 
-### Governance
+GDPR and EU AI Act obligations are satisfied by architectural controls — not by a compliance document that sits next to the system.
 
-- **EU AI Act** — dual-tier risk classification (Art. 6 high-risk + Art. 52 limited risk). All Art. 9–15 obligations mapped to structural architectural controls, not documentation retrofits.
-- **GDPR** — six-principle architectural response (Art. 5). Right to erasure implemented as a four-stage cascade across Neo4j, Vertex AI Search, BigQuery, and Chronicle with mandatory DPO gate.
-- **HITL** — five intercept types modelled as conditional edges in LangGraph. Confidence threshold 0.85 default. Target escalation rate <5% (Run phase). EU AI Act Art. 14 satisfaction is structural.
-- **Responsible AI** — all eight Google RAI principles mapped to verifiable GCP architectural controls.
+- **GDPR Art. 17 erasure** is implemented as a **distributed saga** with explicit compensating transactions, an idempotency key per step, and Chronicle audit at every stage — not a synchronous cascade that cannot guarantee atomicity across Neo4j, Vertex AI Search, and BigQuery simultaneously.
+- **EU AI Act Art. 14 human oversight** is a **LangGraph interrupt node** — non-bypassable by design, not a UI flag that a developer can omit.
+- **GDPR Art. 5 minimisation** is enforced by the ontology schema: only properties defined in the schema can be written to the graph.
 
-### Economics
+### 2. HITL is calibrated, not guessed
 
-- Cost unit: **cost per knowledge query** (not seat, not module).
-- Mid-market: $0.11/query · Enterprise: $0.05/query · Global: $0.03/query
-- Six architectural cost optimisation levers, each bound to an ADR.
-- ROI model: 480% (mid-market year 1) → 2,700% (global enterprise year 1).
+The original architecture used a single global confidence threshold of 0.85. This is architecturally naive for two reasons:
 
-### Operations (Day 2)
+1. Uncalibrated cosine similarity scores are not probabilities (Guo et al., "On Calibration of Modern Neural Networks," ICML 2017)
+2. A query about EU financial services consultant career history carries fundamentally different epistemic risk than a documentation search
 
-- Ten operational scenarios with defined triggers, procedures, and SLOs.
-- Per-layer RTO/RPO: L1 <15min/0min · L2 <30min/<5min · L3 <4h/<1h · L4 <2h/0min.
-- Five AI-specific incident types with regulatory obligation mapping.
-- GDPR erasure cascade SLA: <72 hours (statutory). Automated with mandatory DPO gate.
+KnowledgeFlow uses a **per-category threshold matrix** with Platt-scaled confidence scores, calibrated quarterly on labelled evaluation sets. Two categories have unconditional HITL regardless of confidence: cross-geo OPA override paths and departed employee knowledge nodes.
+
+### 3. Failure modes are first-class architecture
+
+The agent topology is not happy-path-only. Every LangGraph edge is a failure boundary. The **FMEA table** specifies failure mode, severity, detection mechanism, fallback behaviour, SLO impact, and recovery procedure for all 7 agent nodes. Key design choices:
+
+- Audit Agent is non-bypassable: if Chronicle is unavailable, query delivery is held — not abandoned. No unaudited response is delivered.
+- OPA failure is fail-closed: if the policy engine is unreachable, zero nodes are authorised.
+- Neo4j timeout triggers ANN-only fallback with automatic HITL threshold lowering during the degradation window.
+
+### 4. Ontology is the architecture
+
+The knowledge graph has a formal property graph schema (ONT-01): `:Person`, `:Engagement`, `:Expertise`, `:Document` — each with typed property schemas, cardinality constraints, and an explicit index strategy (BTREE + FULLTEXT + RELATIONSHIP indexes).
+
+Without a schema, GDPR erasure cascade is architecturally incomplete. Without an MDM authority model, the ingestion pipeline creates one node per source system rather than one node per real-world person. Both are addressed.
+
+### 5. RLHF is specified, not asserted
+
+The feedback loop uses **Direct Preference Optimisation** (Rafailov et al., NeurIPS 2023) rather than PPO-based RLHF — eliminating the separate reward model and reducing reward hacking risk. Four gates before any model version is promoted to production: win rate, BERTScore, bias parity across geo/role dimensions, and a 48-hour A/B test on 10% of live traffic.
+
+---
+
+## Governance model
+
+KnowledgeFlow targets **EU AI Act Art. 6** (high-risk AI — employment context) and **Art. 52** (limited risk — AI disclosure) simultaneously.
+
+Conformity assessment approach: self-assessment at pre-deployment stage per ISO/IEC 42001:2023. Third-party notified body assessment required at production deployment for EU clients under Art. 43(1).
+
+| Article | Obligation | Status |
+|---------|------------|--------|
+| Art. 9 — Risk management | Continuous lifecycle risk system | ✅ Structural |
+| Art. 10 — Data governance | Training/input data quality | ✅ Structural |
+| Art. 12 — Record keeping | Automatic logging for post-hoc reconstruction | ✅ Structural |
+| Art. 13 — Transparency | AI disclosure on every response | ✅ Structural |
+| Art. 14 — Human oversight | Persons able to oversee and override | ✅ Structural |
+| Art. 15 — Accuracy and robustness | SLOs + drift detection + RLHF | ✅ Structural |
+| Art. 11 — Technical documentation | This portfolio + model registry + ADRs | 🔵 Designed |
+
+---
+
+## Economics (bottom-up)
+
+Cost methodology: unit × quantity from GCP pricing calculator (April 2025). TCO includes infrastructure, HITL labour (15 min/review × 5% intercept rate × €80/hr blended), and engineering. **Not** a conflation of infrastructure cost with TCO.
+
+| Tier | Users | Monthly infra | Full monthly TCO | Est. annual benefit* |
+|------|-------|--------------|-----------------|----------------------|
+| Pilot | 100 | €5,800 | €18,600 | €180K |
+| Mid-scale | 1,000 | €14,200 | €34,700 | €1.8M |
+| Enterprise | 5,000 | €38,900 | €76,400 | €9M |
+
+**Unit economics:** Full TCO cost per query ranges from €0.135 (enterprise) to €0.364 (pilot). Value recovered per query (McKinsey productivity basis): ~€2.32. Break-even requires only 9% search-time reduction — well within the empirical evidence base for comparable interventions.
+
+*\*Annual benefit is an architectural hypothesis based on McKinsey MGI (2012) search-time reduction research. Actual impact requires post-deployment A/B measurement. Presented as a ceiling to demonstrate economic viability, not as a commitment.*
+
+---
+
+## Implementation roadmap
+
+Critical path: **P1.1 Identity federation → P1.2 GCP project → P1.3 OPA policy → P2.1 Ingestion → P2.3 Neo4j graph → P3.1 Agents → P3.2 HITL → P4.2 Pilot**
+
+If identity federation slips by 2 weeks, first production query delivery slips by 2 weeks — every downstream phase is blocked.
+
+| Phase | Weeks | Critical deliverable | Exit gate |
+|-------|-------|---------------------|-----------|
+| 1 — Foundation | 1–8 | Identity federation + OPA policy bundle v1 | First authenticated query reaches OPA · DPO sign-off on schema v1 |
+| 2 — Capability | 9–18 | Ingestion pipeline + Neo4j graph population | 1,000+ nodes · Embedding pipeline SLA met |
+| 3 — Agents | 19–28 | LangGraph state machine + HITL gate | 10 users querying · AG-02 threshold matrix validated |
+| 4 — Production | 29–40 | Full rollout + RLHF cycle 1 | EU AI Act conformity self-assessment · NPS ≥ 35 |
+
+---
+
+## Portfolio contents
+
+The interactive HTML document (`KnowledgeFlow_v2_Architecture.html`) contains:
+
+| Tab | Contents |
+|-----|----------|
+| **Problem** | Business Motivation Model (ArchiMate 3.2 · TOGAF Phase A), stakeholder personas, vertical analysis, problem quantification |
+| **Architecture** | C4-L1 System Context, C4-L2 Container Diagram, four-layer overview, ADRs 001–006 |
+| **Ontology** | ONT-01 property graph schema, MDM authority model, entity resolution pipeline, GDPR erasure saga (ERR-01) |
+| **Agents** | LangGraph state machine with failure edges, per-category HITL threshold matrix, agent FMEA, RLHF pipeline specification |
+| **Governance** | EU AI Act risk tier mapping, GOV-01 conformity obligation table, GDPR six-principle grid, GOV-02 HITL intercept types, three-layer audit architecture |
+| **Simulation** | Interactive knowledge graph (18 nodes, role/geo filters, query walkthrough, HITL routing demo) |
+| **Economics** | Interactive bottom-up cost model (3 tiers), TCO derivation, unit economics, revenue bridge methodology |
+| **Roadmap** | Dependency graph with critical path, four-phase implementation plan with stream decomposition |
+| **Operations** | Eight operational scenarios, SLO definitions, C4-L3 ingestion pipeline component diagram, known limitations |
+
+---
+
+## Diagrams included
+
+- **D1** — Business Motivation Model (ArchiMate 3.2 · Motivation Aspect)
+- **D2** — Capability Map (ArchiMate 3.2 · TOGAF Phase B)
+- **C4-L1** — System Context Diagram
+- **C4-L2** — Container Diagram (all 22 containers, trust zones, multi-tenancy annotation)
+- **C4-L3** — Component Diagram (ingestion pipeline internals)
+- **AG-01** — LangGraph State Machine (full topology with failure edges and HITL loopback)
+- **ONT-01** — Knowledge Graph Property Schema (ER diagram with typed properties and index strategy)
+- **MDM-02** — Entity Resolution Pipeline
+- **ERR-01** — GDPR Art.17 Erasure Saga (orchestration pattern with compensating transactions)
+- **RM-DEPS** — Roadmap Dependency Graph with critical path
 
 ---
 
 ## Technology stack
 
-| Layer | Component | Justification |
-|-------|-----------|---------------|
-| Orchestration | Vertex AI Agent Builder + LangGraph | GCP-native, observable state machine, HITL as graph edge |
-| LLM | Gemini 1.5 Pro | 1M token context, native Vertex AI, multimodal |
-| Knowledge graph | Neo4j Aura Enterprise (GCP Marketplace) | Property graph, Cypher, GDPR-compliant managed, VPC peering |
-| Vector retrieval | Vertex AI Search | Managed ANN, SLA-backed, no index ops overhead |
-| Access policy | OPA (Open Policy Agent) | Declarative Rego, version-controlled, CI/CD testable |
-| MLOps | Vertex AI Pipelines | Three pipelines: ingestion, embedding, RLHF feedback loop |
-| Audit | Chronicle SIEM | Sub-second forensic search, YARA-L detection, 24-month retention |
-| Analytics | BigQuery + Dataplex | Structured audit log, data lineage catalogue, column-level security |
-| Governance dashboard | Looker | RBAC on dashboards, native BigQuery, scheduled compliance reports |
-| IaC | Terraform + Cloud Build | GitOps, no manual provisioning, drift detection |
-| Runtime | GKE Autopilot | Managed Kubernetes, pod auto-provisioning, stateful agent workloads |
-| API gateway | Apigee X | Auth, rate limiting, per-user quota enforcement |
-| Compliance perimeter | VPC Service Controls | Data perimeter, no public egress for PII-touching services |
-
-**Explicitly rejected (with documented rationale):** SharePoint Copilot · Confluence AI · homegrown RAG on LangChain · Glean. See Technology Radar in the portfolio.
-
----
-
-## Access control model
-
-Three composable layers. All three must pass for a knowledge node to be returned.
-
 ```
-Request
-  │
-  ├─[1] RBAC via GCP IAM
-  │       Role: KF_Viewer | KF_Curator | KF_Admin | KF_Compliance
-  │       Coarse-grained service access. Cannot express node-level policy.
-  │
-  ├─[2] ABAC via node attributes
-  │       Every Neo4j node carries: geography · sensitivity · domain · owner_org
-  │       Retrieval agent filters candidate set before graph traversal.
-  │
-  └─[3] OPA policy engine (Rego)
-          Fine-grained, composable, version-controlled rules.
-          Denied-access behaviour is configurable per rule:
-          anonymise | hide | restrict | audit-only
+Language / runtime    Node.js (Next.js SPA) · Python (agent pods)
+Orchestration         LangGraph 0.2.x · Vertex AI Agent Builder
+LLM                   Gemini 1.5 Pro (synthesis) · text-embedding-004 (embeddings)
+Graph database        Neo4j Aura Enterprise 5.x (Cypher · APOC)
+Vector search         Vertex AI Search (ANN · 3072-dim embeddings)
+Policy engine         OPA (Open Policy Agent) v0.60 · Rego
+Stream processing     Cloud Pub/Sub · Dataflow
+ML platform           Vertex AI Pipelines · Vertex Model Registry
+Analytical store      BigQuery · Dataplex
+Audit / SIEM          Chronicle SIEM (YARA-L · 24-month hot retention)
+Infrastructure        GKE Autopilot · VPC Service Controls · Cloud KMS (CMEK)
+IaC / GitOps          Terraform 1.7.x · Cloud Build · Artifact Registry
+API gateway           Apigee X · Identity-Aware Proxy
+Observability         Cloud Trace (OpenTelemetry) · Cloud Monitoring · Looker
 ```
 
-Example Rego rule — geo-exclusion with role override:
-```rego
-allow { input.user.role == "KF_Admin" }
+---
 
-allow {
-  input.user.geography != "CN"
-  input.node.geography != "NL-RESTRICTED"
-}
+## Frameworks and standards
 
-denied_behaviour := "anonymise" { input.node.geography == "NL-RESTRICTED" }
-denied_behaviour := "hide"      { input.node.sensitivity == "confidential" }
-```
-
-Policy changes require a Pull Request, 100% Rego test coverage in CI, architecture owner + DPO approval for rules touching geo-exclusion or sensitivity ceilings. Rollback: single `terraform apply`, <10 minutes.
+- **TOGAF ADM** Phases A–H (Architecture Development Method)
+- **ArchiMate 3.2** (Motivation, Business, Application, Technology aspects)
+- **C4 Model** (Simon Brown) — Levels 1, 2, and 3
+- **EU AI Act** (Regulation 2024/1689) — Arts. 6, 9–15, 43, 52
+- **GDPR** (Regulation 2016/679) — Arts. 5, 7, 12, 13, 17, 30
+- **ISO/IEC 42001:2023** — AI Management System (conformity assessment basis)
+- **OWASP LLM Top 10** — LLM01 (prompt injection) · LLM02 (insecure output handling) threat model
 
 ---
 
-## Agent topology (LangGraph)
+## Known limitations (honest architecture)
 
-```
-Entry node
-    │
-    ▼
-Query agent ──────── Policy agent (OPA eval)
-    │                     │
-    │                     ▼
-    └──────────── Retrieval agent
-                  (Neo4j Cypher + Vertex AI Search ANN hybrid)
-                          │
-                          ▼
-                  Synthesis agent (Gemini 1.5 Pro)
-                          │
-                   confidence < 0.85?
-                    ├── YES → HITL queue (async, Pub/Sub)
-                    └── NO  → Response delivery
-                          │
-                    Audit agent (every transition → Chronicle)
-```
-
-Each agent node has a bounded tool contract. No agent has open-ended internet access or write access to external systems. The HITL conditional edge is not a UI feature — it is a typed LangGraph edge evaluated at every synthesis cycle.
+| Area | Limitation | Resolution path |
+|------|-----------|-----------------|
+| Graph scalability | Performance at 500K+ nodes not empirically validated | Phase 4 load test with synthetic dataset |
+| RLHF sample size | 500+ preference pairs needed per training cycle — accumulation takes ~2 months at pilot scale | Red-teaming supplementation in early cycles |
+| Implicit knowledge capture | Meeting discussions and verbal knowledge not yet captured | Phase 4: Google Meet transcript integration with explicit consent gating |
+| Cross-language graph quality | text-embedding-004 MTEB validated; cross-language relationship quality in production unverified | Phase 3: multilingual held-out eval set |
 
 ---
 
-## HITL design
+## Citation methodology
 
-Human oversight in this architecture satisfies EU AI Act Article 14 structurally, not cosmetically.
+All statistics are drawn from primary research. Secondary aggregator citations (e.g., "Gartner via [blog]") are not used. Statistics dated before 2020 are flagged with their collection year and an applicability note. Where projections are made from older baselines, the assumption is stated explicitly and challengeable.
 
-| Intercept type | Trigger | Reviewer | SLA |
-|----------------|---------|----------|-----|
-| Confidence | Score < 0.85 | KF_Curator | 4h business hours |
-| Sensitivity escalation | confidential node or cross-geo access | KF_Admin / Data Steward | 2–24h |
-| GDPR erasure gate | Art. 17 DSR received | DPO | 72h (statutory) |
-| Policy change review | OPA Rego PR affecting geo/sensitivity | Architecture owner + DPO | 5 business days |
-| Anomaly alert | Chronicle YARA-L rule fires | Security ops (on-call) | 30 minutes |
-
-Reviewer fatigue is architecturally monitored: approval rate >95% over 7 days triggers an architecture owner alert. The target escalation rate is <5% of queries in the Run phase — not by suppressing HITL, but by improving the confidence model through the RLHF feedback loop until genuine uncertainty is rare.
-
----
-
-## MLOps pipelines
-
-Three Vertex AI Pipelines, each with a distinct trigger and governance model.
-
-**Pipeline 1 — Knowledge ingestion**  
-Pub/Sub event → entity extraction → ontology validation → Neo4j write → Dataplex lineage tag. Fully automated. No manual graph editing permitted in production.
-
-**Pipeline 2 — Embedding generation**  
-Weekly scheduled (Sunday 02:00 UTC, Spot VMs) + incremental on every graph write batch. Cadence is a Terraform variable — no code change required to adjust.
-
-**Pipeline 3 — RLHF feedback loop**  
-Every HITL decision (approve/edit/reject) is labelled and stored in BigQuery. Pipeline 3 consumes the labelled feedback store to retrain the synthesis model. A/B test gates every new model version at 10% of traffic before full promotion. Rollback: previous model registry version promoted in <15 minutes.
-
-All retraining runs require a signed-off model card before the model version is promoted. No model is deployed without documented training data lineage, evaluation metrics, and bias assessment results.
-
----
-
-## GDPR erasure cascade
-
-Right to erasure (Art. 17) is a designed system capability, not a manual process.
-
-```
-DSR received
-    │
-    ▼
-Dataplex lineage lookup (automated, <5min)
-    │  ← identifies all affected nodes, embeddings, analytics rows
-    ▼
-DPO HITL gate (mandatory — no automated irreversible deletion)
-    │
-    ├── Neo4j node + edge deletion (Cypher)
-    ├── Vertex AI Search embedding purge
-    ├── BigQuery row anonymisation (audit columns retained)
-    └── Chronicle immutable record (retained 24 months — Art. 17(3))
-
-SLA: full cascade <72 hours (GDPR Art. 12 deadline)
-```
-
-Art. 17(3) note: the audit record of the erasure event is itself a compliance obligation. The fact that data was erased — when, by whom, on whose authority — must be retained. Chronicle holds this record. The personal data is gone; the governance record is not.
-
----
-
-## Cost model
-
-| Tier | Monthly queries | Monthly cost | Cost per query |
-|------|----------------|--------------|----------------|
-| Mid-market | 10,000 | $26,000 | $0.11 |
-| Enterprise | 100,000 | $72,000 | $0.05 |
-| Global enterprise | 1,000,000 | $140,000 | $0.03 |
-
-**Human cost baseline:** A knowledge request consuming 45–90 minutes of combined senior consultant time at $180–240/hr fully-loaded costs $135–360 per event. KnowledgeFlow's cost per query is $0.03–$0.11. The ROI argument at scale is not a spreadsheet exercise — it is an architectural one.
-
-Layer 2 (LLM tokens) is the dominant cost driver at all tiers (~55%). Six architectural optimisation levers address this directly: intelligent model routing (Flash vs Pro), result caching (Redis on Memorystore), Spot VM embedding regeneration, tiered cold storage, per-user query budgets, and committed use discounts at Enterprise tier.
-
----
-
-## Deployment
-
-```
-europe-west4  (primary — Netherlands, GDPR data residency)
-us-central1   (secondary — DR failover)
-asia-east1    (tertiary — APAC read latency)
-```
-
-Three independent Terraform workspaces. State stored in GCS multi-region bucket. Secondary region is pre-configured but not fully provisioned — `terraform apply` provisions the full secondary stack in <2 hours. No snowflake configurations; every infrastructure state is a versioned Git artefact.
-
----
-
-## Roadmap
-
-| Phase | Timeline | ADM phases | Exit gate criteria |
-|-------|----------|------------|--------------------|
-| Crawl | 0–6 months | A–D | ≥100 active users · HITL escalation rate baselined · DPO sign-off |
-| Walk | 6–15 months | E–F | ≥500 active users · escalation rate <10% · multi-region failover tested |
-| Run | 15–30 months | G–H | <5% HITL escalation · cost-per-query within target band · EU AI Act conformity assessment complete |
-
-Phase transitions require a formal TOGAF ADM Phase H gate review by the Architecture Board. Timeline is indicative — gate criteria are exit conditions, not deadlines.
-
----
-
-## Key architectural positions
-
-**On HITL:** Most enterprise AI deployments treat human oversight as a feedback button. This does not satisfy EU AI Act Article 14. Oversight must be interceptive — humans must have the ability to halt, modify, or reverse agent decisions before they take effect. In KnowledgeFlow, HITL is a LangGraph conditional edge. It cannot be bypassed by the application layer.
-
-**On access control:** A policy of "Netherlands users cannot see China office data except when tagged non-sensitive and accessed by a Partner-level role" cannot be expressed in IAM. OPA is not additional complexity — it is the only layer that can express the access semantics the business actually requires.
-
-**On the graph model:** Neo4j is not a retrieval optimisation. Multi-hop relationship traversal with attribute-level policy filtering is not a retrieval problem. It is a graph problem. The impedance mismatch cost of modelling graph semantics in a relational schema is borne at query time, at scale, with latency consequences that are not acceptable in an interactive system.
-
-**On vendor lock-in:** The lock-in risk (ADR-004) is real but overstated at the architecture level. The portable surface is large: Neo4j, OPA, LangGraph, and Terraform all run on any platform. The GCP lock-in surface is the managed compute and storage layer — which is also the layer that costs most to self-manage and is least differentiating to own. The risk is accepted and documented, not ignored.
-
-**On Day 2:** A system architecture that cannot describe its own Day 2 operating model is not production-ready. It is a proof of concept awaiting an incident.
-
----
-
-## About this portfolio
-
-This is an architecture portfolio piece, not a production deployment. The code artefact (`knowledgeflow.html`) is a single-file interactive document — no build step, no dependencies, GitHub Pages ready — containing all 13 diagrams, all 6 ADRs, the interactive knowledge graph simulation, and the complete eight-tab architecture portfolio.
-
-The goal is to demonstrate how a senior/lead enterprise AI architect thinks: from business motivation to operational runbook, across governance frameworks, with every decision documented and every trade-off argued.
+Key references:
+- McKinsey Global Institute, *The Social Economy*, 2012
+- Deloitte Insights / HBR, *The Case for Investing in Knowledge Management*, 2019
+- Forrester, *Enterprise Knowledge Management*, 2022
+- Guo et al., *On Calibration of Modern Neural Networks*, ICML 2017
+- Rafailov et al., *Direct Preference Optimization*, NeurIPS 2023
+- Robinson, Webber & Eifrem, *Graph Databases*, O'Reilly 2nd ed., 2015
+- Richardson, *Microservices Patterns*, Manning, 2018 (saga pattern)
+- Muennighoff et al., *MTEB: Massive Text Embedding Benchmark*, EACL 2023
 
 ---
 
 ## Author
 
-**Siddharth Rao**  
-Enterprise AI Architect · Google Cloud Professional · TOGAF 10 Certified  
-15+ years across enterprise architecture, ML engineering, and generative AI leadership.
+**Siddharth Rao**
+TOGAF Certified Enterprise Architect · Google Cloud Certified Professional Architect · Machine Learning Engineer · Generative AI Leader
 
-[raosiddharth.com](https://raosiddharth.com) · [LinkedIn](https://www.linkedin.com/in/siddharthpotukuchi) · [GitHub](https://github.com/raosiddharthp)
+*This portfolio was developed as an enterprise architecture case study for a 12,000-person professional services firm across 40 offices and 6 continents, addressing knowledge management, agentic AI governance, and EU AI Act compliance at regulated-industry scale.*
 
 ---
 
-*KnowledgeFlow is part of the Autonomous Series — a collection of architecture portfolio pieces demonstrating production-grade AI system design on Google Cloud Platform.*
+*v2.1 · Architecture revised and critique-resolved · April 2025*
